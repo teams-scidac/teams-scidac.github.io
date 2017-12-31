@@ -1,4 +1,5 @@
 theme: jekyll-theme-slate
 title: Towards Exascale Astrophysics of Mergers and Supernovae (TEAMS)
 description: a DOE SciDAC-4 collaboration
+show_downloads: false
 
