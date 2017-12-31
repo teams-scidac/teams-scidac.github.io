@@ -1,15 +1,29 @@
-## Welcome to GitHub Pages
+## Collaboration
 
-You can use the [editor on GitHub](https://github.com/teams-scidac/teams-scidac.github.io/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+TEAMS is a collaboration involving:
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+- Oak Ridge National Laboratory (lead institution)
+- Argonne National Laboratory
+- Lawrence Berkeley National Laboratory
+- Los Alamos National Laboratory
+- Michigan State University
+- Notre Dame University
+- Princeton University
+- Stony Brook University
+- University of California, San Diego
+- University of Tennessee
+- University of Washington
 
-### Markdown
+We aim to study the sites of R-process nucleosynthesis, using a suite of astrophysical simulation
+codes.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Highlights
 
-```markdown
-Syntax highlighted code block
+current highlight
+
+
+## Simulation Codes
+
 
 # Header 1
 ## Header 2
