@@ -1,56 +1,72 @@
 # due to Unicode, this requires python 3+
 
-from __future__ import print_function
+# we take 3 bibtex files:
+#
+# refereed.bib
+# others.bib
+# presentations.bib
+#
+# and the templar
 
 import parser
 
-papers = parser.parse_urlfile("castro-papers.txt")
 
+class PaperCollection(object):
+    def __init__(self, key, papers, ostr=""):
+        self.key = key
+        self.papers = papers
+        self.ostr = ostr
 
-# sorted by topic
+all_papers = []
+all_papers.append(PaperCollection("@@refereed@@", parser.parse_bibfile("refereed.bib")))
+all_papers.append(PaperCollection("@@others@@", parser.parse_bibfile("others.bib")))
+all_papers.append(PaperCollection("@@presentations@@", parser.parse_bibfile("presentations.bib")))
+
+# open the template and the output
 tf = open("papers.template", "r")
-dh = open("papers.html", "w")
+dh = open("../papers.html", "w")
 
-subs = list(set([p.subject for p in papers]))
-subs.sort(key=str.lower)
+for pc in all_papers:
 
-papers_by_subj = {}
+    if not pc.papers:
+        continue
 
-for p in papers:
-    subj = p.subject
-    if not subj in papers_by_subj.keys():
-        papers_by_subj[subj] = [p]
-    else:
-        papers_by_subj[subj].append(p)
+    # sort by date
+    current_year = 3000
+    first = True
+    ostr = ""
 
+    years = list(set([p.year for p in pc.papers]))
+    years.sort(reverse=True)
 
-# now loop over subject
-ostr = ""
-for s in sorted(papers_by_subj, key=str.lower):
-    ps = papers_by_subj[s]
-    ps.sort(reverse=True)
+    for p in pc.papers:
+        if p.year < current_year:
+            if not first:
+                ostr += "</dl>\n"
+            else:
+                first = False
 
-    ostr += "<header class='major'>\n<h3>{}</h3>\n</header>\n".format(s)
+            ostr += "<p><h3><a name='{}'></a>{}<h3>\n".format(p.year, p.year)
+            ostr += "<dl>\n"
 
-    ostr += "<div class='table-wrapper'>\n"
-    ostr += "  <table>\n"
+            current_year = p.year
 
-    for p in ps:
+            t, o, l = p.jstring()
+            if not l == "":
+                ostr += "<dt>{} <a href='{}'>[link]</a></dt>\n".format(t, l)
+            else:
+                ostr += "<dt>{}</dt>\n".format(t)
 
-        t, o, l = p.jstring()
-        ostr += "<td><td>"
-        if not l == "":
-            ostr += "<a href='{}'>{}</a><br>\n".format(l, t)
-        else:
-            ostr += "{}<br>\n".format(t)
+            ostr += "<dd>{}</dd>\n".format(o)
 
-        ostr += "{}</td></tr>".format(o)
+    ostr += "</dl>\n"
+    pc.ostr = ostr
 
-    ostr += "  </table>\n"
-    ostr += "</div>\n"
 
 for line in tf:
-    dh.write(line.replace("@@pub-list@@", ostr))
+    for pc in all_papers:
+        line = line.replace(pc.key, pc.ostr)
+    dh.write(line)
 
 dh.close()
 tf.close()
