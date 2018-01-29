@@ -42,24 +42,27 @@ for pc in all_papers:
     for p in pc.papers:
         if p.year < current_year:
             if not first:
-                ostr += "</dl>\n"
+                ostr += "</table>\n</div>\n"
             else:
                 first = False
 
-            ostr += "<p><h3><a name='{}'></a>{}<h3>\n".format(p.year, p.year)
-            ostr += "<dl>\n"
+            ostr += "<p><h3><a name='{}'></a>{}</h3>\n".format(p.year, p.year)
+
+            ostr += "<div class='table-wrapper'>\n"
+            ostr += "  <table>\n"
 
             current_year = p.year
 
             t, o, l = p.jstring()
+            ostr += "<tr><td>"
             if not l == "":
-                ostr += "<dt>{} <a href='{}'>[link]</a></dt>\n".format(t, l)
+                ostr += "<a href='{}'>{}</a><br>\n".format(l, t)
             else:
-                ostr += "<dt>{}</dt>\n".format(t)
+                ostr += "{}<br>\n".format(t)
 
-            ostr += "<dd>{}</dd>\n".format(o)
+            ostr += "{}</td></tr>\n".format(o)
 
-    ostr += "</dl>\n"
+        ostr += "</table>\n</div>\n"
     pc.ostr = ostr
 
 
