@@ -18,8 +18,11 @@ class PaperCollection(object):
         self.ostr = ostr
 
 all_papers = []
+print("working on refereed.bib")
 all_papers.append(PaperCollection("@@refereed@@", parser.parse_bibfile("refereed.bib")))
+print("working on others.bib")
 all_papers.append(PaperCollection("@@others@@", parser.parse_bibfile("others.bib")))
+print("working on presentations.bib")
 all_papers.append(PaperCollection("@@presentations@@", parser.parse_bibfile("presentations.bib")))
 
 # open the template and the output
