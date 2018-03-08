@@ -51,21 +51,21 @@ for pc in all_papers:
 
             ostr += "<p><h3><a name='{}'></a>{}</h3>\n".format(p.year, p.year)
 
-            ostr += "<div class='table-wrapper'>\n"
-            ostr += "  <table>\n"
+        ostr += "<div class='table-wrapper'>\n"
+        ostr += "  <table>\n"
 
-            current_year = p.year
+        current_year = p.year
 
-            t, o, l = p.jstring()
-            ostr += "<tr><td>"
-            if not l == "":
-                ostr += "<a href='{}'>{}</a><br>\n".format(l, t)
-            else:
-                ostr += "{}<br>\n".format(t)
+        t, o, l = p.jstring()
+        ostr += "<tr><td>"
+        if not l == "":
+            ostr += "<a href='{}'>{}</a><br>\n".format(l, t)
+        else:
+            ostr += "{}<br>\n".format(t)
 
-            ostr += "{}</td></tr>\n".format(o)
+        ostr += "{}</td></tr>\n".format(o)
 
-        ostr += "</table>\n</div>\n"
+    ostr += "</table>\n</div>\n"
     pc.ostr = ostr
 
 
