@@ -87,6 +87,12 @@ h4 {
     line-height: 1.5em;
 }
 
+h4.center {
+    font-size: 1.1em;
+    line-height: 1.5em;
+    text-align: center;
+}
+
 h5 {
     font-size: 0.9em;
     line-height: 1.5em;
@@ -1116,6 +1122,14 @@ body.landing #header nav a {
     border-top: 1px solid rgba(144, 144, 144, 0.25);
     margin-bottom: 4em;
     padding-top: 4em;
+}
+
+.wrapper .profiles {
+    border-bottom: 1px solid rgba(144, 144, 144, 0.25);
+    border-top: 1px solid rgba(144, 144, 144, 0.25);
+    margin-bottom: 1em;
+    padding-top: 1em;
+    background-color: #F5F5F5;
 }
 
 .wrapper.style2 .profile {
