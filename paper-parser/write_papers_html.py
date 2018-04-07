@@ -45,14 +45,14 @@ for pc in all_papers:
     for p in pc.papers:
         if p.year < current_year:
             if not first:
-                ostr += "</table>\n</div>\n"
+                ostr += "</table>\n</div>\n\n"
             else:
                 first = False
 
             ostr += "<p><h3><a name='{}'></a>{}</h3>\n".format(p.year, p.year)
 
-        ostr += "<div class='table-wrapper'>\n"
-        ostr += "  <table>\n"
+            ostr += "<div class='table-wrapper'>\n"
+            ostr += "  <table>\n"
 
         current_year = p.year
 
