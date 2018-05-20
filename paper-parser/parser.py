@@ -1,11 +1,3 @@
-from __future__ import print_function
-
-import bibtexparser
-from bibtexparser.bparser import BibTexParser
-from bibtexparser.customization import *
-import re
-import urllib.request
-
 """
 This is a general parser that will take ADS bibtex listings for
 papers and output a list of Paper objects that contain the
@@ -16,6 +8,14 @@ It optionally supports a list of ADS URLs, and will fetch the bibtex
 for each paper.
 """
 
+from __future__ import print_function
+
+import re
+import urllib.request
+
+import bibtexparser
+from bibtexparser.bparser import BibTexParser
+import bibtexparser.customization as bc
 
 replace_str = {
     r"$^{4}$": r"<sup>4</sup>"
@@ -24,20 +24,23 @@ replace_str = {
 mdash1 = "-{2,3}"
 
 class Paper(object):
-    def __init__(self, entry_type, authors, title, year, journal,
+    """a single paper (or bibtex item)"""
+
+    def __init__(self, entry_type, authors, title, year, journal_in,
                  month=None, booktitle=None, editors=None,
-                 volume=None, pages=None, link=None, note=None,
+                 volume=None, number=None, pages=None, link=None, note=None,
                  subject=None, address=None, organization=None):
 
         self.entry_type = entry_type
         self.authors = list(authors)
         self.title = title
         self.year = int(year)
-        self.journal = journal
+        self.journal = journal_in
         self.month = month
         self.booktitle = booktitle
         self.editors = editors
         self.volume = volume
+        self.number = number
         self.pages = pages
         self.link = link
         self.note = note
@@ -51,16 +54,17 @@ class Paper(object):
     def __lt__(self, other):
         if not self.year == other.year:
             return self.year < other.year
-        else:
-            if not (self.month == None or other.month == None):
-                return self.month < other.month
-            else:
-                return self.year < other.year
+
+        if not (self.month is None or other.month is None):
+            return self.month < other.month
+
+        return self.year < other.year
 
     def jstring(self):
+        """return the string used to cite the paper"""
         t_str = self.title
         for k, v in replace_str.items():
-            t_str = t_str.replace(k,v)
+            t_str = t_str.replace(k, v)
         t_str = re.sub(mdash1, "&mdash;", t_str)
 
         out_str = name_string(self.authors) + " "
@@ -69,24 +73,26 @@ class Paper(object):
         else:
             out_str += "{}, ".format(self.year)
 
-        if not self.journal == None:
+        if not self.journal is None:
             out_str += "{}, ".format(self.journal)
 
-        if not self.booktitle == None:
+        if not self.booktitle is None:
             out_str += "in {}, ".format(self.booktitle)
 
-        if not self.editors == None:
+        if not self.editors is None:
             out_str += "ed. {}, ".format(name_string(self.editors))
 
-        if not self.volume == None:
+        if not self.volume is None:
             out_str += "{}, ".format(self.volume)
 
-        if not self.pages == None:
+        if not self.number is None:
+            out_str += "{}, ".format(self.number)
+
+        if not self.pages is None:
             out_str += "p. {}, ".format(self.pages)
 
-        if not self.note == None:
+        if not self.note is None:
             out_str += "{}, ".format(self.note)
-
 
         if self.entry_type == "presentation":
             out_str += "{}, {}".format(self.organization, self.address)
@@ -97,7 +103,7 @@ class Paper(object):
             if out_str[len(out_str)-1] == ",":
                 out_str = out_str[:len(out_str)-1]
 
-        if not self.link == None:
+        if not self.link is None:
             l_str = "{}".format(self.link)
         else:
             l_str = ""
@@ -106,6 +112,7 @@ class Paper(object):
 
 
 def name_string(names):
+    """string together the authors into a single string"""
     nm_str = ""
     if len(names) == 1:
         nm_str = "{}".format(names[0])
@@ -118,49 +125,54 @@ def name_string(names):
             nm_str += astr.format(a)
     return nm_str
 
-def get_item(dict, name):
-    if name in dict.keys():
-        return dict[name]
-    else:
-        return None
+def get_item(in_dict, name):
+    """query for an item, and if it doesn't exist, return None"""
+    if name in in_dict.keys():
+        return in_dict[name]
+
+    return None
 
 def translate_journal(j):
-    if j == None:
+    """replace some common journal latx commands"""
+    if j is None:
         return None
-    else:
-        jn = j["name"].strip()
-        if jn.lower() == r"\apj":
-            return "ApJ"
-        elif jn.lower() == r"\apjs":
-            return "ApJS"
-        elif jn.lower() == r"\mnras":
-            return "MNRAS"
-        else:
-            return jn
+
+    jn = j["name"].strip()
+    if jn.lower() == r"\apj":
+        return "ApJ"
+    elif jn.lower() == r"\apjs":
+        return "ApJS"
+    elif jn.lower() == r"\mnras":
+        return "MNRAS"
+
+    return jn
 
 def fix_pages(p):
-    if p == None:
+    """update the hyphenation between page ranges"""
+    if p is None:
         return None
-    else:
-        return p.replace("--","&ndash;")
+
+    return p.replace("--", "&ndash;")
 
 def clean_names(a):
-    if a == None:
+    """remove braces and tildes from names"""
+    if a is None:
         return None
-    else:
-        a_new = []
-        for name in a:
-            a_new.append(name.replace("{","").replace("}","").replace("~"," "))
-        return a_new
+
+    a_new = []
+    for name in a:
+        a_new.append(name.replace("{", "").replace("}", "").replace("~", " "))
+    return a_new
 
 def clean_ednames(a):
-    if a == None:
+    """remove braces and tildes from editor names"""
+    if a is None:
         return None
-    else:
-        a_new = []
-        for ed_dict in a:
-            a_new.append(ed_dict["name"].replace("{","").replace("}","").replace("~"," "))
-        return a_new
+
+    a_new = []
+    for ed_dict in a:
+        a_new.append(ed_dict["name"].replace("{", "").replace("}", "").replace("~", " "))
+    return a_new
 
 def customizations(record):
     """Use some functions delivered by the library
@@ -169,15 +181,15 @@ def customizations(record):
     :returns: -- customized record
 
     """
-    record = convert_to_unicode(record)
-    record = type(record)    # lowercase
-    record = author(record)
-    record = editor(record)
-    record = journal(record)
-    record = keyword(record)
-    record = link(record)
-    record = page_double_hyphen(record)
-    record = doi(record)
+    record = bc.convert_to_unicode(record)
+    record = bc.type(record)    # lowercase
+    record = bc.author(record)
+    record = bc.editor(record)
+    record = bc.journal(record)
+    record = bc.keyword(record)
+    record = bc.link(record)
+    record = bc.page_double_hyphen(record)
+    record = bc.doi(record)
     return record
 
 
@@ -185,13 +197,13 @@ def extract_paper_info(e):
     """ take a BibDatabase entry and make a Paper object from it """
 
     if not "title" in e.keys():
-        print( "no title: ", e)
+        print("no title: ", e)
         return None
     else:
         title = e["title"]
 
     if not "author" in e.keys():
-        print( "no author: ", e)
+        print("no author: ", e)
         return None
     else:
         authors = e["author"]
@@ -199,7 +211,8 @@ def extract_paper_info(e):
     authors = clean_names(authors)
 
     volume = get_item(e, "volume")
-    journal = translate_journal(get_item(e, "journal"))
+    number = get_item(e, "number")
+    journal_name = translate_journal(get_item(e, "journal"))
     year = get_item(e, "year")
     month = get_item(e, "month")
     editors = clean_ednames(get_item(e, "editor"))
@@ -212,19 +225,19 @@ def extract_paper_info(e):
     entry_type = get_item(e, "ENTRYTYPE")
 
     if "adsurl" in e.keys():
-        link = get_item(e, "adsurl")
+        link_url = get_item(e, "adsurl")
     else:
         l = get_item(e, "link")
-        if not l == None:
-            link = l[0]["url"]
+        if not l is None:
+            link_url = l[0]["url"]
         else:
-            link = None
+            link_url = None
 
-    return Paper(entry_type, authors, title, year, journal,
+    return Paper(entry_type, authors, title, year, journal_name,
                  month=month, editors=editors,
                  booktitle=booktitle,
-                 volume=volume, pages=pages,
-                 link=link, note=note, subject=subject,
+                 volume=volume, number=number, pages=pages,
+                 link=link_url, note=note, subject=subject,
                  address=address, organization=organization)
 
 
@@ -266,17 +279,17 @@ def parse_urlfile(url_file):
             raw_bibtex_html = bibtex_html.splitlines()
 
             bibtex_string = ""
-            for line in raw_bibtex_html:
-                bibtex_string += "{}\n".format(line.decode("utf8"))
+            for bibline in raw_bibtex_html:
+                bibtex_string += "{}\n".format(bibline.decode("utf8"))
 
             # strip off any header and just leave the bibtex
             found_start = False
             bibtex = ""
-            for line in bibtex_string:
-                if line.startswith("@"):
+            for bibline in bibtex_string:
+                if bibline.startswith("@"):
                     found_start = True
                 if found_start:
-                    bibtex += line
+                    bibtex += bibline
 
             # parse the bibtex string
             bib_database = bibtexparser.loads(bibtex, parser=parser)
@@ -292,6 +305,7 @@ def parse_urlfile(url_file):
 
 
 def parse_bibfile(bibfile):
+    """given a bibtex .bib file, parse it and return the papers found"""
 
     with open(bibfile) as bibtex_file:
         parser = BibTexParser()
