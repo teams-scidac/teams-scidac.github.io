@@ -6,7 +6,6 @@ from bibtexparser.customization import *
 import re
 import urllib.request
 
-
 """
 This is a general parser that will take ADS bibtex listings for
 papers and output a list of Paper objects that contain the
@@ -229,6 +228,7 @@ def parse_urlfile(url_file):
 
         parser = BibTexParser()
         parser.customization = customizations
+        parser.ignore_nonstandard_types = False
 
         for line in f:
             if line.startswith("#") or line.strip() == "": continue
@@ -279,6 +279,7 @@ def parse_bibfile(bibfile):
     with open(bibfile) as bibtex_file:
         parser = BibTexParser()
         parser.customization = customizations
+        parser.ignore_nonstandard_types = False
         bib_database = bibtexparser.load(bibtex_file, parser=parser)
 
         papers = []
