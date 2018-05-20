@@ -24,11 +24,12 @@ replace_str = {
 mdash1 = "-{2,3}"
 
 class Paper(object):
-    def __init__(self, authors, title, year, journal,
+    def __init__(self, entry_type, authors, title, year, journal,
                  month=None, booktitle=None, editors=None,
                  volume=None, pages=None, link=None, note=None,
-                 subject=None):
+                 subject=None, address=None, organization=None):
 
+        self.entry_type = entry_type
         self.authors = list(authors)
         self.title = title
         self.year = int(year)
@@ -41,6 +42,11 @@ class Paper(object):
         self.link = link
         self.note = note
         self.subject = subject
+        self.organization = organization
+        self.address = address
+
+        if self.month is None:
+            self.month = ""
 
     def __lt__(self, other):
         if not self.year == other.year:
@@ -58,7 +64,10 @@ class Paper(object):
         t_str = re.sub(mdash1, "&mdash;", t_str)
 
         out_str = name_string(self.authors) + " "
-        out_str += "{}, ".format(self.year)
+        if self.entry_type == "presentation":
+            out_str += "{} {}, ".format(self.month, self.year)
+        else:
+            out_str += "{}, ".format(self.year)
 
         if not self.journal == None:
             out_str += "{}, ".format(self.journal)
@@ -77,6 +86,10 @@ class Paper(object):
 
         if not self.note == None:
             out_str += "{}, ".format(self.note)
+
+
+        if self.entry_type == "presentation":
+            out_str += "{}, {}".format(self.organization, self.address)
 
         out_str = out_str.strip()
 
@@ -194,6 +207,9 @@ def extract_paper_info(e):
     pages = fix_pages(get_item(e, "pages"))
     note = get_item(e, "note")
     subject = get_item(e, "subject")
+    address = get_item(e, "address")
+    organization = get_item(e, "organization")
+    entry_type = get_item(e, "ENTRYTYPE")
 
     if "adsurl" in e.keys():
         link = get_item(e, "adsurl")
@@ -204,11 +220,12 @@ def extract_paper_info(e):
         else:
             link = None
 
-    return Paper(authors, title, year, journal,
+    return Paper(entry_type, authors, title, year, journal,
                  month=month, editors=editors,
                  booktitle=booktitle,
                  volume=volume, pages=pages,
-                 link=link, note=note, subject=subject)
+                 link=link, note=note, subject=subject,
+                 address=address, organization=organization)
 
 
 def parse_urlfile(url_file):
