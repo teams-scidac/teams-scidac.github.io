@@ -59,9 +59,9 @@ for pc in all_papers:
         t, o, l = p.jstring()
         ostr += "<tr><td>"
         if not l == "":
-            ostr += "<a href='{}'>{}</a><br>\n".format(l, t)
+            ostr += "<a href='{}'><em>{}</em></a><br>\n".format(l, t)
         else:
-            ostr += "{}<br>\n".format(t)
+            ostr += "<em>{}</em><br>\n".format(t)
 
         ostr += "{}</td></tr>\n".format(o)
 
