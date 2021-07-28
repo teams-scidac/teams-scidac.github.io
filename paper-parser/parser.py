@@ -66,6 +66,7 @@ class Paper(object):
         for k, v in replace_str.items():
             t_str = t_str.replace(k, v)
         t_str = re.sub(mdash1, "&mdash;", t_str)
+        t_str = t_str.replace("\ensuremath","")
 
         out_str = name_string(self.authors) + " "
         if self.entry_type == "presentation":
@@ -142,8 +143,16 @@ def translate_journal(j):
         return "ApJ"
     elif jn.lower() == r"\apjs":
         return "ApJS"
+    elif jn.lower() == r"\apjl":
+        return "ApJ Letters"
     elif jn.lower() == r"\mnras":
         return "MNRAS"
+    elif jn.lower() == r"\prc":
+        return "Phys Rev C"
+    elif jn.lower() == r"\prd":
+        return "Phys Rev D"
+    elif jn.lower() == r"\prl":
+        return "Phys Rev Letters"
 
     return jn
 
